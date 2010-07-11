@@ -254,8 +254,8 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 	}
 	else if ([[treeController selectedObjects] count] == 1)
 	{
-		[newSelection addObjectsFromArray:[[[treeController selectedObjects]
-											objectAtIndex:0] allChildLeafs]];
+		CONode *node = [[treeController selectedObjects] objectAtIndex:0];
+		[newSelection addObjectsFromArray:[node allChildLeafs]];
 	}
 	
 	[self setSelectedNodes:newSelection];
@@ -381,44 +381,88 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 			   item:(id)proposedParentItem
 		 childIndex:(NSInteger)proposedChildIndex;
 {
-	NSPasteboard *pboard = [info draggingPasteboard]; // Get the pasteboard
-
+	// Get the pasteboard
+	NSPasteboard *pboard = [info draggingPasteboard];
+	
 	// Check the dragging type
 	if ([pboard availableTypeFromArray:[NSArray arrayWithObject:CONodesPboardType]])
 	{
+		BOOL draggingWithinWindow;
+		NSTreeController *sourceTreeController;
+
+		NSOutlineView *source = [info draggingSource];
+
+		if (source == ov) {
+			draggingWithinWindow = YES;
+			sourceTreeController = treeController;
+		}
+		else {
+			draggingWithinWindow = NO;
+			// This is a bit of a hack: 
+			// we as the outlineTableColumn of the source NSOutlineView 
+			// for the NSTreeController it is bound to. 
+			//NSArray *bindings = [[source outlineTableColumn] exposedBindings];
+			//NSDictionary *valueInfo = [[source outlineTableColumn] infoForBinding:@"value"];
+			sourceTreeController = [[[source outlineTableColumn] infoForBinding:@"value"] valueForKey:NSObservedObjectKey];		
+		}
+		
 		// Read the data
 		NSArray *droppedIndexPaths = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:CONodesPboardType]];
 		
 		// Convert the index paths in droppedIndexPaths into the actual nodes
 		NSMutableArray *draggedNodes = [NSMutableArray array];
 		for (NSIndexPath *indexPath in droppedIndexPaths) {
-			[draggedNodes addObject:[treeController nodeAtIndexPath:indexPath]];
+			[draggedNodes addObject:[sourceTreeController nodeAtIndexPath:indexPath]];
 		}
 		
 		NSIndexPath *targetIndexPath = nil;
-		
-		// If dragged from self...
-		if ([info draggingSource] == ov)
-		{
-			// Determine the index path of the drag target
-			NSIndexPath *proposedParentIndexPath;
-			if (proposedParentItem == nil) {
-				// makes a NSIndexPath with length == 0
-				proposedParentIndexPath = [[[NSIndexPath alloc] init] autorelease];
-			}
-			else {
-				proposedParentIndexPath = [proposedParentItem indexPath];
-			}
-			targetIndexPath = [proposedParentIndexPath indexPathByAddingIndex:proposedChildIndex];
-			
-			[treeController moveNodes:draggedNodes toIndexPath:targetIndexPath];
-			
-			return YES;
+		// Determine the index path of the drag target
+		NSIndexPath *proposedParentIndexPath;
+		if (proposedParentItem == nil) {
+			// makes a NSIndexPath with length == 0
+			proposedParentIndexPath = [[[NSIndexPath alloc] init] autorelease];
 		}
 		else {
-			return NO;
+			proposedParentIndexPath = [proposedParentItem indexPath];
+		}
+		targetIndexPath = [proposedParentIndexPath indexPathByAddingIndex:proposedChildIndex];
+		
+		
+		// If dragged from self...
+		if (draggingWithinWindow)
+		{
+			[treeController moveNodes:draggedNodes toIndexPath:targetIndexPath];
+			
+		}
+		else {
+			// The drag source is another window. 
+			// We need to copy each representedObject to the destination.
+			
+			NSArray *newNodes = [draggedNodes valueForKey:@"representedObject"];
+			
+			// Add the new items (we do this backwards, otherwise they will end up in reverse order)
+			for (CONode *thisNode in [newNodes reverseObjectEnumerator])
+			{
+				// We only want to copy in each item in the array once - if a folder
+				// is open and the folder and its contents were selected and dragged,
+				// we only want to drag the folder, of course.
+				if (![thisNode isDescendantOfNodes:newNodes])
+				{
+					[treeController insertObject:[[thisNode copy] autorelease]
+					   atArrangedObjectIndexPath:targetIndexPath];
+					
+					/*
+					 // Set a unique ID that fits with this document if dragged from another document
+					 if ([info draggingSource] != outlineView)
+					 [[thisNode properties] setValue:[NSNumber
+					 numberWithInt:[self uniqueID]] forKey:@"ID"];
+					 */
+				}
+			}
+			
 		}
 
+		return YES;
 		
 	}
 	
