@@ -27,6 +27,10 @@
 		if ([self isItemExpanded:item]) {
 			// create an array of only the expanded items in the list
 			[expandedItemsArray addObject:[item representedObject]]; 
+			// If the items you use in the outline view are large 
+			// this can significantly increase the size of your save files.
+			// In this case you could add a unique identifier to your objects, 
+			// store that and compare the IDs instead of using -isEqual: below.
 		}
 	}
 	
