@@ -60,7 +60,7 @@
 
 - (NSString *)title
 {
-	return title;
+	return [[title retain] autorelease];
 }
 
 - (void)setProperties:(NSDictionary *)newProperties
@@ -74,7 +74,7 @@
 
 - (NSMutableDictionary *)properties
 {
-	return properties;
+	return [[properties retain] autorelease];
 }
 
 - (void)setChildren:(NSArray *)newChildren
@@ -82,13 +82,13 @@
 	if (children != newChildren)
     {
         [children autorelease];
-        children = [[NSMutableArray alloc] initWithArray:newChildren];
+        children = [newChildren mutableCopy];
     }
 }
 
 - (NSMutableArray *)children
 {
-	return children;
+	return [[children retain] autorelease];
 }
 
 - (void)setLeaf:(BOOL)flag
@@ -173,6 +173,7 @@
 - (NSArray *)descendants
 {
 	NSMutableArray *descendants = [NSMutableArray array];
+	
 	NSEnumerator *enumerator = [children objectEnumerator];
 	id node = nil;
 	while (node = [enumerator nextObject])
@@ -182,6 +183,7 @@
 		if (![node isLeaf])
 			[descendants addObjectsFromArray:[node descendants]];	// Recursive - will go down the chain to get all
 	}
+	
 	return descendants;
 }
 
@@ -189,28 +191,28 @@
 - (NSArray *)allChildLeafs
 {
 	NSMutableArray *childLeafs = [NSMutableArray array];
-	NSEnumerator *enumerator = [children objectEnumerator];
-	id node = nil;
-	while (node = [enumerator nextObject])
+	
+	for (id node in children)
 	{
 		if ([node isLeaf])
 			[childLeafs addObject:node];
 		else
 			[childLeafs addObjectsFromArray:[node allChildLeafs]];	// Recursive - will go down the chain to get all
 	}
+		
 	return childLeafs;
 }
 
 - (NSArray *)groupChildren
 {
 	NSMutableArray *groupChildren = [NSMutableArray array];
-	NSEnumerator *childEnumerator = [children objectEnumerator];
-	KBBaseNode *child;
-	while (child = [childEnumerator nextObject])
+	
+	for (KBBaseNode *child in children)
 	{
 		if (![child isLeaf])
 			[groupChildren addObject:child];
 	}
+	
 	return groupChildren;
 }
 
