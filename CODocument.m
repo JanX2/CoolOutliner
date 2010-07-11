@@ -8,10 +8,12 @@
 
 #import "CODocument.h"
 #import "CONode.h"
+#import "NSOutlineView+StateSaving.h"
 
 @implementation CODocument
 
 @synthesize contents;
+@synthesize tempExpandedItems;
 
 - (id)init
 {
@@ -40,6 +42,9 @@
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
 {
     [super windowControllerDidLoadNib:aController];
+	[outlineView expandItems:[self tempExpandedItems]];
+	[self setTempExpandedItems:nil];
+
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
 }
 
@@ -53,6 +58,7 @@
 
 	NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:
 					   contents, @"contents",
+					   [outlineView expandedItems], @"expandedItems",
 					   nil];
 	NSData *data = [NSKeyedArchiver archivedDataWithRootObject:d];
 	return data;
@@ -70,6 +76,10 @@
 	
 	NSDictionary *d = [NSKeyedUnarchiver unarchiveObjectWithData:data];
 	[self setContents:[d objectForKey:@"contents"]];
+	// We have to defer expanding the items until the outlineView actually exists -> windowControllerDidLoadNib
+	// If you have a better idea how to resolve this, fork this on github, apply your changes and send a pull request. 
+	[self setTempExpandedItems:[d objectForKey:@"expandedItems"]];
+
 	return YES;
 }
 

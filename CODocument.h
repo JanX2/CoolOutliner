@@ -8,6 +8,7 @@
 
 
 #import <Cocoa/Cocoa.h>
+
 @interface CODocument : NSDocument
 {
 	IBOutlet NSOutlineView *outlineView;
@@ -17,9 +18,12 @@
 	IBOutlet NSArrayController *arrayController;
 	
 	NSArray *contents;
+	
+	NSArray *tempExpandedItems;
 }
 
 @property (copy) NSArray *contents;
+@property (copy) NSArray *tempExpandedItems;
 
 - (IBAction)addGroup:(id)sender;
 - (IBAction)addNote:(id)sender;

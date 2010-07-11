@@ -12,6 +12,7 @@
 		3D922E2B11E8DB390005BE86 /* KBBaseNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D922E2811E8DB390005BE86 /* KBBaseNode.m */; };
 		3D922E2C11E8DB390005BE86 /* NSArray_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D922E2A11E8DB390005BE86 /* NSArray_Extensions.m */; };
 		3D922E3111E8DC420005BE86 /* CONode.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D922E3011E8DC420005BE86 /* CONode.m */; };
+		3D922EDE11E9C15A0005BE86 /* NSOutlineView+StateSaving.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D922EDD11E9C15A0005BE86 /* NSOutlineView+StateSaving.m */; };
 		8D15AC2C0486D014006FF6A4 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 2A37F4B9FDCFA73011CA2CEA /* Credits.rtf */; };
 		8D15AC2F0486D014006FF6A4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165FFE840EACC02AAC07 /* InfoPlist.strings */; };
 		8D15AC310486D014006FF6A4 /* CODocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A37F4ACFDCFA73011CA2CEA /* CODocument.m */; settings = {ATTRIBUTES = (); }; };
@@ -38,6 +39,8 @@
 		3D922E2A11E8DB390005BE86 /* NSArray_Extensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSArray_Extensions.m; sourceTree = "<group>"; };
 		3D922E2F11E8DC420005BE86 /* CONode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CONode.h; sourceTree = "<group>"; };
 		3D922E3011E8DC420005BE86 /* CONode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CONode.m; sourceTree = "<group>"; };
+		3D922EDC11E9C15A0005BE86 /* NSOutlineView+StateSaving.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSOutlineView+StateSaving.h"; sourceTree = "<group>"; };
+		3D922EDD11E9C15A0005BE86 /* NSOutlineView+StateSaving.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSOutlineView+StateSaving.m"; sourceTree = "<group>"; };
 		8D15AC360486D014006FF6A4 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D15AC370486D014006FF6A4 /* CoolOutliner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoolOutliner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -95,6 +98,8 @@
 		2A37F4ABFDCFA73011CA2CEA /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				3D922EDC11E9C15A0005BE86 /* NSOutlineView+StateSaving.h */,
+				3D922EDD11E9C15A0005BE86 /* NSOutlineView+StateSaving.m */,
 				3D922E2711E8DB390005BE86 /* KBBaseNode.h */,
 				3D922E2811E8DB390005BE86 /* KBBaseNode.m */,
 				3D922E2911E8DB390005BE86 /* NSArray_Extensions.h */,
@@ -199,6 +204,7 @@
 				3D922E2B11E8DB390005BE86 /* KBBaseNode.m in Sources */,
 				3D922E2C11E8DB390005BE86 /* NSArray_Extensions.m in Sources */,
 				3D922E3111E8DC420005BE86 /* CONode.m in Sources */,
+				3D922EDE11E9C15A0005BE86 /* NSOutlineView+StateSaving.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
