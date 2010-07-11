@@ -21,8 +21,6 @@
 	NSArray *selectedNodes;
 	
 	NSArray *tempExpandedItems;
-	
-	NSArray *draggedNodes;
 }
 
 - (void)setContents:(NSArray *)newContents;

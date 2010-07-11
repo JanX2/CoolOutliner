@@ -9,6 +9,10 @@
 #import "CODocument.h"
 #import "CONode.h"
 #import "NSOutlineView+StateSaving.h"
+#import "NSArray_ESExtensions.h"
+#import "NSTreeController_Extensions.h"
+#import "NSTreeNode_Extensions.h"
+#import "NSIndexPath_Extensions.h"
 
 NSString * const	CONodesPboardType = @"CONodesPboardType";
 
@@ -309,170 +313,187 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 		 writeItems:(NSArray *)items
 	   toPasteboard:(NSPasteboard *)pboard;
 {
-	// Save the list of items (don't need to retain as it's just used temporarily while the drag occurs)
-	// (Note that we have to convert this to the observed object because we are using NSTreeController)
-	draggedNodes = [items valueForKey:@"representedObject"];
-	
 	// Declare the types we are about to put on the pasteboard
 	[pboard declareTypes:[NSArray arrayWithObject:CONodesPboardType] owner:self];
 	
 	// Archive the nodes for moving (we must set the data as we can drag to another document if we want)
-	NSData *data = [NSKeyedArchiver archivedDataWithRootObject:draggedNodes];
-	[pboard setData:data forType:CONodesPboardType];
+	[pboard setData:[NSKeyedArchiver archivedDataWithRootObject:[items valueForKey:@"indexPath"]] forType:CONodesPboardType];
 	
 	return YES;
 }
 
 - (NSDragOperation)outlineView:(NSOutlineView *)ov
 				  validateDrop:(id <NSDraggingInfo>)info
-				  proposedItem:(id)item
-			proposedChildIndex:(NSInteger)index;
+				  proposedItem:(id)proposedParentItem
+			proposedChildIndex:(NSInteger)proposedChildIndex;
 {
+	// Ensure the proposed drop index is valid
+	if (proposedChildIndex == -1) // will be -1 if the mouse is hovering over a leaf node
+		return NSDragOperationNone;
+
+	// If we are dragging into the root (contents) - in which case
+	// the item will be nil - we are fine
+	if (proposedParentItem == nil)
+		return NSDragOperationGeneric;
+	
 	NSPasteboard *pboard = [info draggingPasteboard];
-	
-	// Convert item to something useful (because we are using NSTreeController)
-	CONode *proposedItem = [item representedObject];
-	
+
 	// Check drag types
 	if ([pboard availableTypeFromArray:[NSArray arrayWithObject:CONodesPboardType]])
 	{
-		// Ensure the proposed drop index is valid
-		if (index == -1)
-			return NSDragOperationNone;
+		NSArray *draggedIndexPaths = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:CONodesPboardType]];
+		BOOL targetIsValid = YES;
 		
-		// If we are dragging into the root (contents) - in which case
-		// the item will be nil - we are fine
-		if (!proposedItem)
-			return NSDragOperationGeneric;
-		
-		// We can only drag into folders
-		if (![proposedItem isLeaf])
-		{
-			// If we were dragged from a different outline view, we don't need to do any more checks - just accept
-			if ([info draggingSource] != outlineView)
-				return NSDragOperationGeneric;
+		for (NSIndexPath *indexPath in draggedIndexPaths) {
 			
-			// Otherwise, we have to make sure the drop is valid
+			NSTreeNode *node = [treeController nodeAtIndexPath:indexPath];
 			
-			// Don't allow a folder to be dragged inside itself or any of its descendants
-			// (We check draggedNodes because we have to check the items that are currently there)
-			if ([proposedItem isDescendantOfOrOneOfNodes:draggedNodes])
-				return NSDragOperationNone;
-			
-			// If we've got this far, we're good to go
-			return NSDragOperationGeneric;
+			// We can only drag into folders
+			if (!node.isLeaf) {
+				
+				// If we were dragged from a different outline view, we don't need to do any more checks - just accept
+				if ([info draggingSource] != outlineView)
+					return NSDragOperationGeneric;
+				
+				// Otherwise, we have to make sure the drop is valid
+				
+				// Don't allow a folder to be dragged inside itself or any of its descendants
+				// (We check draggedNodes because we have to check the items that are currently there)
+				if ([proposedParentItem isDescendantOfNode:node] || proposedParentItem == node) { 
+					targetIsValid = NO;
+					break;
+				}
+				
+			}
 		}
+		
+		// If we've got this far and the target is valid, we're good to go
+		return targetIsValid ? NSDragOperationMove : NSDragOperationNone;
+		
 	}
+	
 	return NSDragOperationNone;
+	
 }
 
 - (BOOL)outlineView:(NSOutlineView *)ov
 		 acceptDrop:(id <NSDraggingInfo>)info
-			   item:(id)targetItem
-		 childIndex:(NSInteger)index;
+			   item:(id)proposedParentItem
+		 childIndex:(NSInteger)proposedChildIndex;
 {
-	NSUInteger i, n;
 	NSPasteboard *pboard = [info draggingPasteboard]; // Get the pasteboard
-	CONode *targetNode = [targetItem representedObject];
-	NSMutableArray *targetArray = (targetItem) ? [targetNode children] : contents;
-	
+
 	// Check the dragging type
 	if ([pboard availableTypeFromArray:[NSArray arrayWithObject:CONodesPboardType]])
 	{
 		// Read the data
-		NSData *data = [pboard dataForType:CONodesPboardType];
-		NSArray *newNodes = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+		NSArray *droppedIndexPaths = [NSKeyedUnarchiver unarchiveObjectWithData:[pboard dataForType:CONodesPboardType]];
 		
-		// Add the new items (we do this backwards, otherwise they will end up in reverse order)
-		for (CONode *thisNode in [newNodes reverseObjectEnumerator])
-		{
-			// We only want to copy in each item in the array once - if a folder
-			// is open and the folder and its contents were selected and dragged,
-			// we only want to drag the folder, of course.
-			if (![thisNode isDescendantOfNodes:newNodes])
-			{
-				[targetArray insertObject:thisNode atIndex:index];
-				
-				// For some reason, when using an NSTreeController, it is vital to refresh the data,
-				// otherwise we get strange effects.
-				if (targetItem)
-					[outlineView reloadItem:targetItem reloadChildren:[ov isItemExpanded:targetItem]];
-				else
-					[outlineView reloadData];
-				
-				/*
-				// Set a unique ID that fits with this document if dragged from another document
-				if ([info draggingSource] != outlineView)
-					[[thisNode properties] setValue:[NSNumber
-																	   numberWithInt:[self uniqueID]] forKey:@"ID"];
-				 */
-			}
+		// Convert the index paths in droppedIndexPaths into the actual nodes
+		NSMutableArray *draggedNodes = [NSMutableArray array];
+		for (NSIndexPath *indexPath in droppedIndexPaths) {
+			[draggedNodes addObject:[treeController nodeAtIndexPath:indexPath]];
 		}
 		
-		// Now delete the originals if dragged from self
+		NSIndexPath *targetIndexPath = nil;
+		
+		// If dragged from self...
 		if ([info draggingSource] == ov)
 		{
-			for (CONode *thisNode in draggedNodes)
-			{
-				// First, try deleting them from the root folder
-				[contents removeObject:thisNode];
-				
-				// In case this didn’t work, check all the subfolders
-				for (CONode *aNode in draggedNodes)
-				{
-					if(![aNode isLeaf])
-						[aNode removeObjectFromChildren:thisNode];
-				}
+			// Determine the index path of the drag target
+			NSIndexPath *proposedParentIndexPath;
+			if (proposedParentItem == nil) {
+				// makes a NSIndexPath with length == 0
+				proposedParentIndexPath = [[[NSIndexPath alloc] init] autorelease];
 			}
+			else {
+				proposedParentIndexPath = [proposedParentItem indexPath];
+			}
+			targetIndexPath = [proposedParentIndexPath indexPathByAddingIndex:proposedChildIndex];
 			
-			// Reload the outline view
-			[outlineView reloadData];
+			[treeController moveNodes:draggedNodes toIndexPath:targetIndexPath];
+			
+			return YES;
 		}
-		
-		// Make sure target item is expanded
-		if (targetItem)
-			[ov expandItem:targetItem];
-		
-		// Now go through the outline view and select any items that we just added (note that
-		// we extend the selection only after selecting the first one, so that this replaces
-		// any current selection).
-		BOOL extendSelection = NO;
-		for (i = [outlineView rowForItem:targetItem]; i < [outlineView numberOfRows]; i++)
-		{
-			if ([newNodes containsObject:[[ov itemAtRow:i] representedObject]])
-			{
-				[outlineView selectRow:i byExtendingSelection:extendSelection];
-				extendSelection = YES;
-			}
+		else {
+			return NO;
 		}
-		return YES;
+
 		
 	}
-	return NO;
 	
+	return NO;
+
 }
 
-/*
-#pragma mark -
-#pragma mark NSOutlineView Hacks for Drag and Drop
-
-- (BOOL) outlineView:(NSOutlineView *)ov
-	isItemExpandable:(id)item 
-{ return NO; }
-
-- (int)    outlineView:(NSOutlineView *)ov
-numberOfChildrenOfItem:(id)item
-{ return 0; }
-
-- (id)   outlineView:(NSOutlineView *)ov
-			   child:(NSInteger)index
-			  ofItem:(id)item 
-{ return nil; }
-
-- (id)        outlineView: (NSOutlineView *)ov
-objectValueForTableColumn:(NSTableColumn*)col
-				   byItem:(id)item 
-{ return nil; }
-*/
+#if 0
+{
+	
+	// Add the new items (we do this backwards, otherwise they will end up in reverse order)
+	for (CONode *thisNode in [newNodes reverseObjectEnumerator])
+	{
+		// We only want to copy in each item in the array once - if a folder
+		// is open and the folder and its contents were selected and dragged,
+		// we only want to drag the folder, of course.
+		if (![thisNode isDescendantOfNodes:newNodes])
+		{
+			[targetArray insertObject:thisNode atIndex:index];
+			
+			// For some reason, when using an NSTreeController, it is vital to refresh the data,
+			// otherwise we get strange effects.
+			if (targetItem)
+				[outlineView reloadItem:targetItem reloadChildren:[ov isItemExpanded:targetItem]];
+			else
+				[outlineView reloadData];
+			
+			/*
+			 // Set a unique ID that fits with this document if dragged from another document
+			 if ([info draggingSource] != outlineView)
+			 [[thisNode properties] setValue:[NSNumber
+			 numberWithInt:[self uniqueID]] forKey:@"ID"];
+			 */
+		}
+	}
+	
+	// Now delete the originals if dragged from self
+	if ([info draggingSource] == ov)
+	{
+		for (CONode *thisNode in draggedNodes)
+		{
+			// First, try deleting them from the root folder
+			[contents removeObject:thisNode];
+			
+			// In case this didn’t work, check all the subfolders
+			for (CONode *aNode in draggedNodes)
+			{
+				if(![aNode isLeaf])
+					[aNode removeObjectFromChildren:thisNode];
+			}
+		}
+		
+		// Reload the outline view
+		[outlineView reloadData];
+	}
+	
+	// Make sure target item is expanded
+	if (targetItem)
+		[ov expandItem:targetItem];
+	
+	// Now go through the outline view and select any items that we just added (note that
+	// we extend the selection only after selecting the first one, so that this replaces
+	// any current selection).
+	BOOL extendSelection = NO;
+	for (i = [outlineView rowForItem:targetItem]; i < [outlineView numberOfRows]; i++)
+	{
+		if ([newNodes containsObject:[[ov itemAtRow:i] representedObject]])
+		{
+			[outlineView selectRow:i byExtendingSelection:extendSelection];
+			extendSelection = YES;
+		}
+	}
+	return YES;
+	
+}
+#endif
 
 @end

@@ -13,6 +13,10 @@
 		3D922E2C11E8DB390005BE86 /* NSArray_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D922E2A11E8DB390005BE86 /* NSArray_Extensions.m */; };
 		3D922E3111E8DC420005BE86 /* CONode.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D922E3011E8DC420005BE86 /* CONode.m */; };
 		3D922EDE11E9C15A0005BE86 /* NSOutlineView+StateSaving.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D922EDD11E9C15A0005BE86 /* NSOutlineView+StateSaving.m */; };
+		3D92314D11EA26F10005BE86 /* NSTreeNode_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D92314B11EA26F10005BE86 /* NSTreeNode_Extensions.m */; };
+		3D92315611EA271D0005BE86 /* NSIndexPath_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D92315511EA271D0005BE86 /* NSIndexPath_Extensions.m */; };
+		3D92316011EA276E0005BE86 /* NSTreeController_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D92315F11EA276E0005BE86 /* NSTreeController_Extensions.m */; };
+		3D92317F11EA28700005BE86 /* NSArray_ESExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D92317E11EA28700005BE86 /* NSArray_ESExtensions.m */; };
 		8D15AC2C0486D014006FF6A4 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 2A37F4B9FDCFA73011CA2CEA /* Credits.rtf */; };
 		8D15AC2F0486D014006FF6A4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165FFE840EACC02AAC07 /* InfoPlist.strings */; };
 		8D15AC310486D014006FF6A4 /* CODocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A37F4ACFDCFA73011CA2CEA /* CODocument.m */; settings = {ATTRIBUTES = (); }; };
@@ -41,6 +45,14 @@
 		3D922E3011E8DC420005BE86 /* CONode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CONode.m; sourceTree = "<group>"; };
 		3D922EDC11E9C15A0005BE86 /* NSOutlineView+StateSaving.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSOutlineView+StateSaving.h"; sourceTree = "<group>"; };
 		3D922EDD11E9C15A0005BE86 /* NSOutlineView+StateSaving.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSOutlineView+StateSaving.m"; sourceTree = "<group>"; };
+		3D92314B11EA26F10005BE86 /* NSTreeNode_Extensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSTreeNode_Extensions.m; sourceTree = "<group>"; };
+		3D92314C11EA26F10005BE86 /* NSTreeNode_Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSTreeNode_Extensions.h; sourceTree = "<group>"; };
+		3D92315411EA271D0005BE86 /* NSIndexPath_Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSIndexPath_Extensions.h; sourceTree = "<group>"; };
+		3D92315511EA271D0005BE86 /* NSIndexPath_Extensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSIndexPath_Extensions.m; sourceTree = "<group>"; };
+		3D92315E11EA276E0005BE86 /* NSTreeController_Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSTreeController_Extensions.h; sourceTree = "<group>"; };
+		3D92315F11EA276E0005BE86 /* NSTreeController_Extensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSTreeController_Extensions.m; sourceTree = "<group>"; };
+		3D92317D11EA28700005BE86 /* NSArray_ESExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSArray_ESExtensions.h; sourceTree = "<group>"; };
+		3D92317E11EA28700005BE86 /* NSArray_ESExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSArray_ESExtensions.m; sourceTree = "<group>"; };
 		8D15AC360486D014006FF6A4 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D15AC370486D014006FF6A4 /* CoolOutliner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoolOutliner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -98,6 +110,14 @@
 		2A37F4ABFDCFA73011CA2CEA /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				3D92317D11EA28700005BE86 /* NSArray_ESExtensions.h */,
+				3D92317E11EA28700005BE86 /* NSArray_ESExtensions.m */,
+				3D92315E11EA276E0005BE86 /* NSTreeController_Extensions.h */,
+				3D92315F11EA276E0005BE86 /* NSTreeController_Extensions.m */,
+				3D92315411EA271D0005BE86 /* NSIndexPath_Extensions.h */,
+				3D92315511EA271D0005BE86 /* NSIndexPath_Extensions.m */,
+				3D92314C11EA26F10005BE86 /* NSTreeNode_Extensions.h */,
+				3D92314B11EA26F10005BE86 /* NSTreeNode_Extensions.m */,
 				3D922EDC11E9C15A0005BE86 /* NSOutlineView+StateSaving.h */,
 				3D922EDD11E9C15A0005BE86 /* NSOutlineView+StateSaving.m */,
 				3D922E2711E8DB390005BE86 /* KBBaseNode.h */,
@@ -205,6 +225,10 @@
 				3D922E2C11E8DB390005BE86 /* NSArray_Extensions.m in Sources */,
 				3D922E3111E8DC420005BE86 /* CONode.m in Sources */,
 				3D922EDE11E9C15A0005BE86 /* NSOutlineView+StateSaving.m in Sources */,
+				3D92314D11EA26F10005BE86 /* NSTreeNode_Extensions.m in Sources */,
+				3D92315611EA271D0005BE86 /* NSIndexPath_Extensions.m in Sources */,
+				3D92316011EA276E0005BE86 /* NSTreeController_Extensions.m in Sources */,
+				3D92317F11EA28700005BE86 /* NSArray_ESExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
