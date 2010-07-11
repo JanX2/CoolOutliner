@@ -55,7 +55,6 @@
 - (NSArray *)mutableKeys
 {
 	return [[super mutableKeys] arrayByAddingObjectsFromArray:[NSArray arrayWithObjects:
-															   @"title",
 															   @"description",
 															   @"text",
 															   nil]];

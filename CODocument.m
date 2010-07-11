@@ -51,10 +51,11 @@
 
     // For applications targeted for Panther or earlier systems, you should use the deprecated API -dataRepresentationOfType:. In this case you can also choose to override -fileWrapperRepresentationOfType: or -writeToFile:ofType: instead.
 
-    if ( outError != NULL ) {
-		*outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:unimpErr userInfo:NULL];
-	}
-	return nil;
+	NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:
+					   contents, @"contents",
+					   nil];
+	NSData *data = [NSKeyedArchiver archivedDataWithRootObject:d];
+	return data;
 }
 
 - (BOOL)readFromData:(NSData *)data ofType:(NSString *)typeName error:(NSError **)outError
@@ -65,10 +66,11 @@
     
     // For applications targeted for Panther or earlier systems, you should use the deprecated API -loadDataRepresentation:ofType. In this case you can also choose to override -readFromFile:ofType: or -loadFileWrapperRepresentation:ofType: instead.
     
-    if ( outError != NULL ) {
-		*outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:unimpErr userInfo:NULL];
-	}
-    return YES;
+	// Note that we have only done the bare minimum here – if this was a shipping application, we should really check for errors and fill outError as appropriate, and check for typeName if we want to allow different types.
+	
+	NSDictionary *d = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+	[self setContents:[d objectForKey:@"contents"]];
+	return YES;
 }
 
 /*
