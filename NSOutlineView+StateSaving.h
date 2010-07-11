@@ -12,6 +12,6 @@
 @interface NSOutlineView (StateSavingExtensions) 
 
 - (NSArray *)expandedItems;
-- (void)expandItems:(NSArray *)array;
+- (void)restoreExpandedStateWithArray:(NSArray *)array;
 
 @end

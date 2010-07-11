@@ -10,6 +10,10 @@
 
 
 @implementation NSOutlineView (StateSavingExtensions)
+/* The following code is based on Jonathan Dann’s sample code posted here:
+ * “NSOutlineView autosaving of expanded/collapsed”
+ * http://www.cocoabuilder.com/archive/cocoa/199705-nsoutlineview-autosaving-of-expanded-collapsed-state.html
+ */
 
 // The returned array can then be archived.
 - (NSArray *)expandedItems;
@@ -31,15 +35,13 @@
 
 
 /*
-It uses NSTreeNode and -representedObject, so is 10.5 only. For 10.4
+This uses NSTreeNode and -representedObject, so it’s 10.5 only. For 10.4
 there is an undocumented method for the private class that
-NSTreeController used in 10.4 that does the same thing, can't remember
-the method name but it's on Scott Stevenson's blog somewhere, just
-Google theococoa.com and NSTreeController.
+NSTreeController used in 10.4 that does the same thing: -observedObject
  */
 
 // Passing the (now unarchived) array to the method below will expand them again.
-- (void)expandItems:(NSArray *)array;
+- (void)restoreExpandedStateWithArray:(NSArray *)array;
 {
 	NSUInteger row, numberOfRows = [self numberOfRows];
 	for (id savedItem in array) {

@@ -42,7 +42,7 @@
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
 {
     [super windowControllerDidLoadNib:aController];
-	[outlineView expandItems:[self tempExpandedItems]];
+	[outlineView restoreExpandedStateWithArray:[self tempExpandedItems]];
 	[self setTempExpandedItems:nil];
 
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
