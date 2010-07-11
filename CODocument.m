@@ -13,6 +13,8 @@
 @implementation CODocument
 
 @synthesize contents;
+@synthesize selectedNodes;
+
 @synthesize tempExpandedItems;
 
 - (id)init
@@ -21,6 +23,7 @@
     if (self) {
     
 		[self setContents:[NSArray array]];
+		[self setSelectedNodes:[NSArray array]];
     
     }
     return self;
@@ -29,6 +32,7 @@
 - (void)dealloc
 {
 	[self setContents:nil];
+	[self setSelectedNodes:nil];
 	[super dealloc];
 }
 
@@ -76,6 +80,7 @@
 	
 	NSDictionary *d = [NSKeyedUnarchiver unarchiveObjectWithData:data];
 	[self setContents:[d objectForKey:@"contents"]];
+
 	// We have to defer expanding the items until the outlineView actually exists -> windowControllerDidLoadNib
 	// If you have a better idea how to resolve this, fork this on github, apply your changes and send a pull request. 
 	[self setTempExpandedItems:[d objectForKey:@"expandedItems"]];
@@ -167,10 +172,41 @@
 	if ([notification object] != outlineView)
 		return;
 	
+	// Deal with multiple selections
+	NSMutableArray *newSelection = [NSMutableArray array];
+	if ([[treeController selectedObjects] count] > 1)
+	{
+		NSEnumerator *enumerator = [[treeController selectedObjects] objectEnumerator];
+		CONode *node;
+		
+		while (node = [enumerator nextObject])
+		{
+			if ([node isLeaf])
+			{
+				if (![newSelection containsObject:node])
+					[newSelection addObject:node];
+			}
+			else
+			{
+				NSMutableArray *leafNodes = [[node allChildLeafs] mutableCopy];
+				[leafNodes removeObjectsInArray:newSelection];
+				[newSelection addObjectsFromArray:leafNodes];
+				[leafNodes release];
+			}
+		}
+	}
+	else if ([[treeController selectedObjects] count] == 1)
+	{
+		[newSelection addObjectsFromArray:[[[treeController selectedObjects]
+											objectAtIndex:0] allChildLeafs]];
+	}
+	
+	[self setSelectedNodes:newSelection];
+	
 	// If the selection changed to nothing, do nothing
 	if ([[treeController selectedObjects] count] == 0)
 		return;
-	
+
 	CONode *selectedNode = [[treeController selectedObjects] objectAtIndex:0];
 	
 	// Don't display the text of group nodes

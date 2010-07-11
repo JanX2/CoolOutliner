@@ -18,11 +18,14 @@
 	IBOutlet NSArrayController *arrayController;
 	
 	NSArray *contents;
+	NSArray *selectedNodes;
 	
 	NSArray *tempExpandedItems;
 }
 
 @property (copy) NSArray *contents;
+@property (copy) NSArray *selectedNodes;
+
 @property (copy) NSArray *tempExpandedItems;
 
 - (IBAction)addGroup:(id)sender;
