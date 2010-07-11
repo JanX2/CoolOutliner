@@ -18,7 +18,7 @@
     self = [super init];
     if (self) {
     
-		contents = [[NSArray alloc] init];
+		[self setContents:[NSArray array]];
     
     }
     return self;
@@ -26,7 +26,7 @@
 
 - (void)dealloc
 {
-	[contents release];
+	[self setContents:nil];
 	[super dealloc];
 }
 
