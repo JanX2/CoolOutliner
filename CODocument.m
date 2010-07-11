@@ -10,9 +10,10 @@
 #import "CONode.h"
 #import "NSOutlineView+StateSaving.h"
 
+NSString * const	CONodesPboardType = @"CONodesPboardType";
+
 @implementation CODocument
 
-@synthesize contents;
 @synthesize selectedNodes;
 
 @synthesize tempExpandedItems;
@@ -22,7 +23,7 @@
     self = [super init];
     if (self) {
     
-		[self setContents:[NSArray array]];
+		[self setContents:[[NSMutableArray alloc] init]];
 		[self setSelectedNodes:[NSArray array]];
     
     }
@@ -46,10 +47,15 @@
 - (void)windowControllerDidLoadNib:(NSWindowController *) aController
 {
     [super windowControllerDidLoadNib:aController];
-	[outlineView restoreExpandedStateWithArray:[self tempExpandedItems]];
-	[self setTempExpandedItems:nil];
-
+	
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
+	[outlineView registerForDraggedTypes:[NSArray arrayWithObject:CONodesPboardType]];
+
+	if ([self tempExpandedItems] != nil)
+	{
+		[outlineView restoreExpandedStateWithArray:[self tempExpandedItems]];
+		[self setTempExpandedItems:nil];
+	}
 }
 
 - (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError
@@ -88,21 +94,67 @@
 	return YES;
 }
 
-/*
 - (void)setContents:(NSArray *)newContents;
 {
 	if (contents != newContents)
 	{
 		[contents autorelease];
-		contents = [[NSMutableArray alloc] initWithArray:newContents];
+		contents = [newContents mutableCopy];
 	}
 }
 
-- (NSMutableArray *)contents;
-{
-	return contents;
+- (NSArray *)contents {
+    if (!contents) {
+        contents = [[NSMutableArray alloc] init];
+    }
+    return [[contents retain] autorelease];
+}
+
+/*
+- (unsigned)countOfContents {
+    if (!contents) {
+        contents = [[NSMutableArray alloc] init];
+    }
+    return [contents count];
+}
+
+- (id)objectInContentsAtIndex:(unsigned)theIndex {
+    if (!contents) {
+        contents = [[NSMutableArray alloc] init];
+    }
+    return [contents objectAtIndex:theIndex];
+}
+
+- (void)getContents:(id *)objsPtr range:(NSRange)range {
+    if (!contents) {
+        contents = [[NSMutableArray alloc] init];
+    }
+    [contents getObjects:objsPtr range:range];
+}
+
+- (void)insertObject:(id)obj inContentsAtIndex:(unsigned)theIndex {
+    if (!contents) {
+        contents = [[NSMutableArray alloc] init];
+    }
+    [contents insertObject:obj atIndex:theIndex];
+}
+
+- (void)removeObjectFromContentsAtIndex:(unsigned)theIndex {
+    if (!contents) {
+        contents = [[NSMutableArray alloc] init];
+    }
+    [contents removeObjectAtIndex:theIndex];
+}
+
+- (void)replaceObjectInContentsAtIndex:(unsigned)theIndex withObject:(id)obj {
+    if (!contents) {
+        contents = [[NSMutableArray alloc] init];
+    }
+    [contents replaceObjectAtIndex:theIndex withObject:obj];
 }
 */
+
+
 
 - (IBAction)addGroup:(id)sender
 {
@@ -149,6 +201,7 @@
 	}
 	
 	// We can't add nodes to leaf nodes
+	// CHANGEME: Add node to parent instead
 	if ([[[treeController selectedObjects] objectAtIndex:0] isLeaf])
 	{
 		NSBeep();
@@ -250,4 +303,176 @@
 	if (![textView isEditable])
 		[textView setEditable:YES];
 }
+
+
+- (BOOL)outlineView:(NSOutlineView *)ov
+		 writeItems:(NSArray *)items
+	   toPasteboard:(NSPasteboard *)pboard;
+{
+	// Save the list of items (don't need to retain as it's just used temporarily while the drag occurs)
+	// (Note that we have to convert this to the observed object because we are using NSTreeController)
+	draggedNodes = [items valueForKey:@"representedObject"];
+	
+	// Declare the types we are about to put on the pasteboard
+	[pboard declareTypes:[NSArray arrayWithObject:CONodesPboardType] owner:self];
+	
+	// Archive the nodes for moving (we must set the data as we can drag to another document if we want)
+	NSData *data = [NSKeyedArchiver archivedDataWithRootObject:draggedNodes];
+	[pboard setData:data forType:CONodesPboardType];
+	
+	return YES;
+}
+
+- (NSDragOperation)outlineView:(NSOutlineView *)ov
+				  validateDrop:(id <NSDraggingInfo>)info
+				  proposedItem:(id)item
+			proposedChildIndex:(NSInteger)index;
+{
+	NSPasteboard *pboard = [info draggingPasteboard];
+	
+	// Convert item to something useful (because we are using NSTreeController)
+	CONode *proposedItem = [item representedObject];
+	
+	// Check drag types
+	if ([pboard availableTypeFromArray:[NSArray arrayWithObject:CONodesPboardType]])
+	{
+		// Ensure the proposed drop index is valid
+		if (index == -1)
+			return NSDragOperationNone;
+		
+		// If we are dragging into the root (contents) - in which case
+		// the item will be nil - we are fine
+		if (!proposedItem)
+			return NSDragOperationGeneric;
+		
+		// We can only drag into folders
+		if (![proposedItem isLeaf])
+		{
+			// If we were dragged from a different outline view, we don't need to do any more checks - just accept
+			if ([info draggingSource] != outlineView)
+				return NSDragOperationGeneric;
+			
+			// Otherwise, we have to make sure the drop is valid
+			
+			// Don't allow a folder to be dragged inside itself or any of its descendants
+			// (We check draggedNodes because we have to check the items that are currently there)
+			if ([proposedItem isDescendantOfOrOneOfNodes:draggedNodes])
+				return NSDragOperationNone;
+			
+			// If we've got this far, we're good to go
+			return NSDragOperationGeneric;
+		}
+	}
+	return NSDragOperationNone;
+}
+
+- (BOOL)outlineView:(NSOutlineView *)ov
+		 acceptDrop:(id <NSDraggingInfo>)info
+			   item:(id)targetItem
+		 childIndex:(NSInteger)index;
+{
+	NSUInteger i, n;
+	NSPasteboard *pboard = [info draggingPasteboard]; // Get the pasteboard
+	CONode *targetNode = [targetItem representedObject];
+	NSMutableArray *targetArray = (targetItem) ? [targetNode children] : contents;
+	
+	// Check the dragging type
+	if ([pboard availableTypeFromArray:[NSArray arrayWithObject:CONodesPboardType]])
+	{
+		// Read the data
+		NSData *data = [pboard dataForType:CONodesPboardType];
+		NSArray *newNodes = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+		
+		// Add the new items (we do this backwards, otherwise they will end up in reverse order)
+		for (CONode *thisNode in [newNodes reverseObjectEnumerator])
+		{
+			// We only want to copy in each item in the array once - if a folder
+			// is open and the folder and its contents were selected and dragged,
+			// we only want to drag the folder, of course.
+			if (![thisNode isDescendantOfNodes:newNodes])
+			{
+				[targetArray insertObject:thisNode atIndex:index];
+				
+				// For some reason, when using an NSTreeController, it is vital to refresh the data,
+				// otherwise we get strange effects.
+				if (targetItem)
+					[outlineView reloadItem:targetItem reloadChildren:[ov isItemExpanded:targetItem]];
+				else
+					[outlineView reloadData];
+				
+				/*
+				// Set a unique ID that fits with this document if dragged from another document
+				if ([info draggingSource] != outlineView)
+					[[thisNode properties] setValue:[NSNumber
+																	   numberWithInt:[self uniqueID]] forKey:@"ID"];
+				 */
+			}
+		}
+		
+		// Now delete the originals if dragged from self
+		if ([info draggingSource] == ov)
+		{
+			for (CONode *thisNode in draggedNodes)
+			{
+				// First, try deleting them from the root folder
+				[contents removeObject:thisNode];
+				
+				// In case this didn’t work, check all the subfolders
+				for (CONode *aNode in draggedNodes)
+				{
+					if(![aNode isLeaf])
+						[aNode removeObjectFromChildren:thisNode];
+				}
+			}
+			
+			// Reload the outline view
+			[outlineView reloadData];
+		}
+		
+		// Make sure target item is expanded
+		if (targetItem)
+			[ov expandItem:targetItem];
+		
+		// Now go through the outline view and select any items that we just added (note that
+		// we extend the selection only after selecting the first one, so that this replaces
+		// any current selection).
+		BOOL extendSelection = NO;
+		for (i = [outlineView rowForItem:targetItem]; i < [outlineView numberOfRows]; i++)
+		{
+			if ([newNodes containsObject:[[ov itemAtRow:i] representedObject]])
+			{
+				[outlineView selectRow:i byExtendingSelection:extendSelection];
+				extendSelection = YES;
+			}
+		}
+		return YES;
+		
+	}
+	return NO;
+	
+}
+
+/*
+#pragma mark -
+#pragma mark NSOutlineView Hacks for Drag and Drop
+
+- (BOOL) outlineView:(NSOutlineView *)ov
+	isItemExpandable:(id)item 
+{ return NO; }
+
+- (int)    outlineView:(NSOutlineView *)ov
+numberOfChildrenOfItem:(id)item
+{ return 0; }
+
+- (id)   outlineView:(NSOutlineView *)ov
+			   child:(NSInteger)index
+			  ofItem:(id)item 
+{ return nil; }
+
+- (id)        outlineView: (NSOutlineView *)ov
+objectValueForTableColumn:(NSTableColumn*)col
+				   byItem:(id)item 
+{ return nil; }
+*/
+
 @end

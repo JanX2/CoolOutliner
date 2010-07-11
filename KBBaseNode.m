@@ -22,7 +22,7 @@
 	{
 		[self setTitle:@"Untitled"];
 		[self setProperties:[NSDictionary dictionary]];
-		[self setChildren:[NSArray array]];
+		[self setChildren:[NSMutableArray array]];
 		[self setLeaf:NO];							// Container by default
 	}
 	return self;

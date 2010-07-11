@@ -17,13 +17,25 @@
 	IBOutlet NSTreeController *treeController;
 	IBOutlet NSArrayController *arrayController;
 	
-	NSArray *contents;
+	NSMutableArray *contents;
 	NSArray *selectedNodes;
 	
 	NSArray *tempExpandedItems;
+	
+	NSArray *draggedNodes;
 }
 
-@property (copy) NSArray *contents;
+- (void)setContents:(NSArray *)newContents;
+- (NSArray *)contents;
+/*
+- (unsigned)countOfContents;
+- (id)objectInContentsAtIndex:(unsigned)theIndex;
+- (void)getContents:(id *)objsPtr range:(NSRange)range;
+- (void)insertObject:(id)obj inContentsAtIndex:(unsigned)theIndex;
+- (void)removeObjectFromContentsAtIndex:(unsigned)theIndex;
+- (void)replaceObjectInContentsAtIndex:(unsigned)theIndex withObject:(id)obj;
+*/
+
 @property (copy) NSArray *selectedNodes;
 
 @property (copy) NSArray *tempExpandedItems;
