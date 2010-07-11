@@ -10,6 +10,7 @@
 
 @implementation KBBaseNode
 
+
 /*************************** Init/Dealloc ***************************/
 
 #pragma mark -
@@ -111,6 +112,13 @@
 {
 	// Just return the result of comparing the titles
 	return [[[self title] lowercaseString] compare:[[aNode title] lowercaseString]];
+}
+
+- (NSUInteger)countOfChildren;
+{
+	if (self.isLeaf)
+		return 0;
+	return [self.children count];
 }
 
 /*************************** Drag'n'Drop Convenience Methods ***************************/
@@ -399,4 +407,35 @@
 		[super setNilValueForKey:key];
 }
 
+/*************************** Node Modification Convenience Methods ***************************/
+#pragma mark -
+#pragma mark Node Modification Convenience Methods
+
+- (void)insertObject:(id)object inChildrenAtIndex:(NSUInteger)index;
+{
+	if (self.isLeaf)
+		return;
+	[self.children insertObject:object atIndex:index];
+}
+
+- (void)removeObjectFromChildrenAtIndex:(NSUInteger)index;
+{
+	if (self.isLeaf)
+		return;
+	[self.children removeObjectAtIndex:index];
+}
+
+- (id)objectInChildrenAtIndex:(NSUInteger)index;
+{
+	if (self.isLeaf)
+		return nil;
+	return [self.children objectAtIndex:index];
+}
+
+- (void)replaceObjectInChildrenAtIndex:(NSUInteger)index withObject:(id)object;
+{
+	if (self.isLeaf)
+		return;
+	[self.children replaceObjectAtIndex:index withObject:object];
+}
 @end

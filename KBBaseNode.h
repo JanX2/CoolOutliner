@@ -46,6 +46,9 @@
 /* For sorting */
 - (NSComparisonResult)compare:(KBBaseNode *)aNode;
 
+/* Returns the count of child nodes */
+- (NSUInteger)countOfChildren;
+
 /*************************** Archiving/Copying Support ***************************/
 
 /* Subclasses should override this method to maintain support for archiving and copying */
@@ -82,5 +85,14 @@
 
 /* Returns the index path of within the given array - useful for dragging and dropping */
 - (NSIndexPath *)indexPathInArray:(NSArray *)array;
+
+/*************************** Node Modification Convenience Methods ***************************/
+- (void)insertObject:(id)object inChildrenAtIndex:(NSUInteger)index;
+
+- (void)removeObjectFromChildrenAtIndex:(NSUInteger)index;
+
+- (id)objectInChildrenAtIndex:(NSUInteger)index;
+
+- (void)replaceObjectInChildrenAtIndex:(NSUInteger)index withObject:(id)object;
 
 @end
