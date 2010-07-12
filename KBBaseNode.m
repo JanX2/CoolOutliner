@@ -82,7 +82,7 @@
 	if (children != newChildren)
     {
         [children autorelease];
-        children = [newChildren mutableCopy];
+        children = [[NSMutableArray alloc] initWithArray:newChildren copyItems:YES];
     }
 }
 
