@@ -466,18 +466,18 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 		[ov expandItem:proposedParentItem];
 
 		// Now go through the outline view and select any items that we just added (note that
-		// we extend the selection only after selecting the first one, so that this replaces
-		// any current selection).
+		// we don’t extend the selection, so that this replaces any current selection).
+		NSMutableIndexSet *indexSet = [NSMutableIndexSet indexSet];
 		NSInteger i;
-		BOOL extendSelection = NO;
 		for (i = [ov rowForItem:proposedParentItem]; i < [ov numberOfRows]; i++)
 		{
 			if ([draggedNodes containsObject:[ov itemAtRow:i]])
 			{
-				[ov selectRow:i byExtendingSelection:extendSelection];
-				extendSelection = YES;
+				[indexSet addIndex:i];
 			}
 		}
+		[ov selectRowIndexes:indexSet byExtendingSelection:NO];
+
 
 		return YES;
 		
