@@ -461,6 +461,23 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 			}
 			
 		}
+		
+		// Make sure the proposed parent is expanded
+		[ov expandItem:proposedParentItem];
+
+		// Now go through the outline view and select any items that we just added (note that
+		// we extend the selection only after selecting the first one, so that this replaces
+		// any current selection).
+		NSInteger i;
+		BOOL extendSelection = NO;
+		for (i = [ov rowForItem:proposedParentItem]; i < [ov numberOfRows]; i++)
+		{
+			if ([draggedNodes containsObject:[ov itemAtRow:i]])
+			{
+				[ov selectRow:i byExtendingSelection:extendSelection];
+				extendSelection = YES;
+			}
+		}
 
 		return YES;
 		
@@ -469,75 +486,5 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 	return NO;
 
 }
-
-#if 0
-{
-	
-	// Add the new items (we do this backwards, otherwise they will end up in reverse order)
-	for (CONode *thisNode in [newNodes reverseObjectEnumerator])
-	{
-		// We only want to copy in each item in the array once - if a folder
-		// is open and the folder and its contents were selected and dragged,
-		// we only want to drag the folder, of course.
-		if (![thisNode isDescendantOfNodes:newNodes])
-		{
-			[targetArray insertObject:thisNode atIndex:index];
-			
-			// For some reason, when using an NSTreeController, it is vital to refresh the data,
-			// otherwise we get strange effects.
-			if (targetItem)
-				[outlineView reloadItem:targetItem reloadChildren:[ov isItemExpanded:targetItem]];
-			else
-				[outlineView reloadData];
-			
-			/*
-			 // Set a unique ID that fits with this document if dragged from another document
-			 if ([info draggingSource] != outlineView)
-			 [[thisNode properties] setValue:[NSNumber
-			 numberWithInt:[self uniqueID]] forKey:@"ID"];
-			 */
-		}
-	}
-	
-	// Now delete the originals if dragged from self
-	if ([info draggingSource] == ov)
-	{
-		for (CONode *thisNode in draggedNodes)
-		{
-			// First, try deleting them from the root folder
-			[contents removeObject:thisNode];
-			
-			// In case this didn’t work, check all the subfolders
-			for (CONode *aNode in draggedNodes)
-			{
-				if(![aNode isLeaf])
-					[aNode removeObjectFromChildren:thisNode];
-			}
-		}
-		
-		// Reload the outline view
-		[outlineView reloadData];
-	}
-	
-	// Make sure target item is expanded
-	if (targetItem)
-		[ov expandItem:targetItem];
-	
-	// Now go through the outline view and select any items that we just added (note that
-	// we extend the selection only after selecting the first one, so that this replaces
-	// any current selection).
-	BOOL extendSelection = NO;
-	for (i = [outlineView rowForItem:targetItem]; i < [outlineView numberOfRows]; i++)
-	{
-		if ([newNodes containsObject:[[ov itemAtRow:i] representedObject]])
-		{
-			[outlineView selectRow:i byExtendingSelection:extendSelection];
-			extendSelection = YES;
-		}
-	}
-	return YES;
-	
-}
-#endif
 
 @end
