@@ -12,6 +12,7 @@
 @implementation CONode
 
 @synthesize description;
+@synthesize expandState;
 
 - (id)init
 {
@@ -56,6 +57,7 @@
 	return [[super mutableKeys] arrayByAddingObjectsFromArray:[NSArray arrayWithObjects:
 															   @"description",
 															   @"text",
+															   @"expandState", 
 															   nil]];
 }
 

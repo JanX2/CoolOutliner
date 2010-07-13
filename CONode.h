@@ -14,9 +14,11 @@
 {
 	NSString *description;
 	NSTextStorage *text;
+	NSNumber *expandState;
 }
 
 @property (retain) NSString *description;
+@property (retain) NSNumber *expandState;
 
 - (void)setText:(id)newText;
 - (NSTextStorage *)text;

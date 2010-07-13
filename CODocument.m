@@ -55,10 +55,13 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
 	[outlineView registerForDraggedTypes:[NSArray arrayWithObject:CONodesPboardType]];
 
-	if ([self tempExpandedItems] != nil)
-	{
-		[outlineView restoreExpandedStateWithArray:[self tempExpandedItems]];
-		[self setTempExpandedItems:nil];
+	NSInteger row, numberOfRows = [outlineView numberOfRows];
+	for (row = 0; row < numberOfRows; row++) {
+		NSTreeNode *item = [outlineView itemAtRow:row];
+		if ([[[item representedObject] expandState] boolValue]) {
+			[outlineView expandItem:item];
+			numberOfRows = [outlineView numberOfRows];
+		}
 	}
 }
 
@@ -72,7 +75,6 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 
 	NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:
 					   contents, @"contents",
-					   [outlineView expandedItems], @"expandedItems",
 					   nil];
 	NSData *data = [NSKeyedArchiver archivedDataWithRootObject:d];
 	return data;
@@ -90,10 +92,6 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 	
 	NSDictionary *d = [NSKeyedUnarchiver unarchiveObjectWithData:data];
 	[self setContents:[d objectForKey:@"contents"]];
-
-	// We have to defer expanding the items until the outlineView actually exists -> windowControllerDidLoadNib
-	// If you have a better idea how to resolve this, fork this on github, apply your changes and send a pull request. 
-	[self setTempExpandedItems:[d objectForKey:@"expandedItems"]];
 
 	return YES;
 }
@@ -281,15 +279,36 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 		[textView setEditable:YES];
 }
 
+/*
+ The following two methods are based on 
+ “Saving the expand state of a NSOutlineView” by Jason Swain
+ http://gibbston.net/?p=4
+ */
+
+- (void)outlineViewItemDidExpand:(NSNotification *)notification
+{
+	CONode* groupItem = [[[notification userInfo] valueForKey:@"NSObject"] representedObject];
+	[groupItem setExpandState:[NSNumber numberWithBool:YES]];
+}
+
+- (void)outlineViewItemDidCollapse:(NSNotification *)notification
+{
+	CONode* groupItem = [[[notification userInfo] valueForKey:@"NSObject"] representedObject];
+	[groupItem setExpandState:[NSNumber numberWithBool:NO]];
+}
+
+
 - (void)tableViewSelectionDidChange:(NSNotification *)notification
 {
 	// Make sure we are responding to the correct table view
 	if ([notification object] != tableView)
 		return;
 	
-	// If the selection changed to nothing, do nothing
+	// If the selection changed to nothing, do nothing. 
 	if ([[arrayController selectedObjects] count] == 0)
+	{
 		return;
+	}
 	
 	CONode *selectedNode = [[arrayController selectedObjects] objectAtIndex:0];
 	

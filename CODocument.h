@@ -19,8 +19,6 @@
 	
 	NSMutableArray *contents;
 	NSArray *selectedNodes;
-	
-	NSArray *tempExpandedItems;
 }
 
 - (void)setContents:(NSArray *)newContents;
