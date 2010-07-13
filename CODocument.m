@@ -309,6 +309,16 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 }
 
 
+/*************************** Drag’n’Drop ***************************/
+
+#pragma mark -
+#pragma mark Drag’n’Drop
+
+/*
+ Based on “NSTreeController and Core Data, Sorted.” by Jonathan Dann
+ http://espresso-served-here.com/2008/05/13/nstreecontroller-and-core-data-sorted/
+ */
+
 - (BOOL)outlineView:(NSOutlineView *)ov
 		 writeItems:(NSArray *)items
 	   toPasteboard:(NSPasteboard *)pboard;
