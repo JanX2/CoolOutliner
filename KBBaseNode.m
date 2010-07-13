@@ -207,7 +207,7 @@
 	return groupChildren;
 }
 
-- (BOOL)isDescendantOfOrOneOfNodes:(NSArray*)nodes
+- (BOOL)isDescendantOfOrOneOfNodes:(NSArray *)nodes
 {
     // Returns YES if we are contained anywhere inside the array passed in, including inside sub-nodes.
 	for (id node in nodes)
@@ -226,7 +226,7 @@
     return NO;
 }
 
-- (BOOL)isDescendantOfNodes:(NSArray*)nodes
+- (BOOL)isDescendantOfNodes:(NSArray *)nodes
 {
     // Returns YES if any node in the array passed in is an ancestor of ours.
 	for (id node in nodes)
