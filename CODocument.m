@@ -232,12 +232,9 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 	
 	// Deal with multiple selections
 	NSMutableArray *newSelection = [NSMutableArray array];
-	if ([[treeController selectedObjects] count] > 1)
+	if ([[treeController selectedObjects] count] > 0)
 	{
-		NSEnumerator *enumerator = [[treeController selectedObjects] objectEnumerator];
-		CONode *node;
-		
-		while (node = [enumerator nextObject])
+		for (CONode *node in [treeController selectedObjects])
 		{
 			if ([node isLeaf])
 			{
@@ -253,33 +250,9 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 			}
 		}
 	}
-	else if ([[treeController selectedObjects] count] == 1)
-	{
-		CONode *node = [[treeController selectedObjects] objectAtIndex:0];
-		[newSelection addObjectsFromArray:[node allChildLeafs]];
-	}
 	
 	[self setSelectedNodes:newSelection];
 	
-	// If the selection changed to nothing, do nothing
-	if ([[treeController selectedObjects] count] == 0)
-		return;
-
-	CONode *selectedNode = [[treeController selectedObjects] objectAtIndex:0];
-	
-	// Don't display the text of group nodes
-	if (![selectedNode isLeaf])
-		return;
-	
-	[textView setSelectedRange:NSMakeRange(0,0)];
-	
-	// Replace the text in the text view if it has changed
-	if ([textView textStorage] != [selectedNode text])
-		[[textView layoutManager] replaceTextStorage:[selectedNode text]];
-	
-	// Make sure the text view is in an editable state
-	if (![textView isEditable])
-		[textView setEditable:YES];
 }
 
 /*
@@ -298,38 +271,6 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 {
 	CONode* groupItem = [[[notification userInfo] valueForKey:@"NSObject"] representedObject];
 	[groupItem setExpandState:[NSNumber numberWithBool:NO]];
-}
-
-
-- (void)tableViewSelectionDidChange:(NSNotification *)notification
-{
-	// Make sure we are responding to the correct table view
-	if ([notification object] != tableView)
-		return;
-	
-	// If the selection changed to nothing, empty and lock text view.
-	if ([[arrayController selectedObjects] count] == 0)
-	{
-		[[textView layoutManager] replaceTextStorage:[[[NSTextStorage alloc] init] autorelease]];
-		[textView setEditable:NO];
-		return;
-	}
-	
-	CONode *selectedNode = [[arrayController selectedObjects] objectAtIndex:0];
-	
-	// Don't display the text of group nodes
-	if (![selectedNode isLeaf])
-		return;
-	
-	[textView setSelectedRange:NSMakeRange(0,0)];
-	
-	// Replace the text in the text view if it has changed
-	if ([textView textStorage] != [selectedNode text])
-		[[textView layoutManager] replaceTextStorage:[selectedNode text]];
-	
-	// Make sure the text view is in an editable state
-	if (![textView isEditable])
-		[textView setEditable:YES];
 }
 
 
