@@ -39,6 +39,7 @@
 - (NSArray *)leafDescendants;
 - (NSArray *)siblings;
 - (BOOL)isDescendantOfNode:(NSTreeNode *)node;
+- (BOOL)isDescendantOfNodes:(NSArray *)nodes;
 - (BOOL)isSiblingOfNode:(NSTreeNode *)node;
 - (BOOL)isSiblingOfOrDescendantOfNode:(NSTreeNode *)node;
 - (NSIndexPath *)adjacentIndexPath;

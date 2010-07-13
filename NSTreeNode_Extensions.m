@@ -82,6 +82,21 @@
 	return [[node descendants] containsObject:self];
 }
 
+- (BOOL)isDescendantOfNodes:(NSArray *)nodes
+{
+    // Returns YES if any node in the array passed in is an ancestor of ours.
+	for (id node in nodes) {
+		// Check sub-nodes
+		if (![node isLeaf] && [self isDescendantOfNode:node]) {
+			return YES;
+		}
+    }
+	
+	// Didn't find self inside any of the nodes passed in
+	return NO;
+	
+}
+
 - (BOOL)isSiblingOfNode:(NSTreeNode *)node;
 {
 	return ([self parentNode] == [node parentNode]);

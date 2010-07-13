@@ -317,7 +317,8 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 	[pboard declareTypes:[NSArray arrayWithObject:CONodesPboardType] owner:self];
 	
 	// Archive the nodes for moving (we must set the data as we can drag to another document if we want)
-	[pboard setData:[NSKeyedArchiver archivedDataWithRootObject:[items valueForKey:@"indexPath"]] forType:CONodesPboardType];
+	NSData *data = [NSKeyedArchiver archivedDataWithRootObject:[items valueForKey:@"indexPath"]];
+	[pboard setData:data forType:CONodesPboardType];
 	
 	return YES;
 }
@@ -399,11 +400,10 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 		else {
 			draggingWithinWindow = NO;
 			// This is a bit of a hack: 
-			// we as the outlineTableColumn of the source NSOutlineView 
+			// we ask the outlineTableColumn of the source NSOutlineView 
 			// for the NSTreeController it is bound to. 
-			//NSArray *bindings = [[source outlineTableColumn] exposedBindings];
-			//NSDictionary *valueInfo = [[source outlineTableColumn] infoForBinding:@"value"];
-			sourceTreeController = [[[source outlineTableColumn] infoForBinding:@"value"] valueForKey:NSObservedObjectKey];		
+			sourceTreeController = [[[source outlineTableColumn] infoForBinding:@"value"] 
+									valueForKey:NSObservedObjectKey];		
 		}
 		
 		// Read the data
@@ -413,6 +413,18 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 		NSMutableArray *draggedNodes = [NSMutableArray array];
 		for (NSIndexPath *indexPath in droppedIndexPaths) {
 			[draggedNodes addObject:[sourceTreeController nodeAtIndexPath:indexPath]];
+		}
+
+		// Filter out any nodes that are descendants of other selected nodes
+		NSMutableArray *filteredNodes = [NSMutableArray array];
+		for (NSTreeNode *thisNode in draggedNodes) {
+			// We only want to copy in each item in the array once - if a folder
+			// is open and the folder and its contents were selected and dragged,
+			// we only want to drag the folder, of course.
+			if (![thisNode isDescendantOfNodes:draggedNodes])
+			{
+				[filteredNodes addObject:thisNode];
+			}
 		}
 		
 		NSIndexPath *targetIndexPath = nil;
@@ -431,33 +443,32 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 		// If dragged from self...
 		if (draggingWithinWindow)
 		{
-			[treeController moveNodes:draggedNodes toIndexPath:targetIndexPath];
+			// We need to move each node to the destination.
+
+			[treeController moveNodes:filteredNodes toIndexPath:targetIndexPath];
 			
 		}
 		else {
 			// The drag source is another window. 
 			// We need to copy each representedObject to the destination.
 			
-			NSArray *newNodes = [draggedNodes valueForKey:@"representedObject"];
+			NSArray *newNodes = [filteredNodes valueForKey:@"representedObject"];
 			
 			// Add the new items (we do this backwards, otherwise they will end up in reverse order)
 			for (CONode *thisNode in [newNodes reverseObjectEnumerator])
 			{
-				// We only want to copy in each item in the array once - if a folder
-				// is open and the folder and its contents were selected and dragged,
-				// we only want to drag the folder, of course.
-				if (![thisNode isDescendantOfNodes:newNodes])
-				{
-					[treeController insertObject:[[thisNode copy] autorelease]
+				// We could use insertObjects:atArrangedObjectIndexPaths: here, 
+				// but would have to prepare an array of index paths beforehand, 
+				// which prevents any advantages.
+				[treeController insertObject:[[thisNode copy] autorelease]
 					   atArrangedObjectIndexPath:targetIndexPath];
 					
-					/*
-					 // Set a unique ID that fits with this document if dragged from another document
-					 if ([info draggingSource] != outlineView)
-					 [[thisNode properties] setValue:[NSNumber
-					 numberWithInt:[self uniqueID]] forKey:@"ID"];
-					 */
-				}
+				/*
+				// Set a unique ID that fits with this document if dragged from another document
+				if ([info draggingSource] != outlineView)
+					[[thisNode properties] setValue:[NSNumber
+													 numberWithInt:[self uniqueID]] forKey:@"ID"];
+				 */
 			}
 			
 		}
