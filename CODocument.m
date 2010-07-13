@@ -20,8 +20,6 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 
 @synthesize selectedNodes;
 
-@synthesize tempExpandedItems;
-
 - (id)init
 {
     self = [super init];
@@ -63,6 +61,11 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 			numberOfRows = [outlineView numberOfRows];
 		}
 	}
+	
+	// Deselect all
+	// Alternatively we could save the selection and restore it here.  
+	[treeController setSelectionIndexPath:[[[NSIndexPath alloc] init] autorelease]];
+	
 }
 
 - (NSData *)dataOfType:(NSString *)typeName error:(NSError **)outError
@@ -304,9 +307,11 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
 	if ([notification object] != tableView)
 		return;
 	
-	// If the selection changed to nothing, do nothing. 
+	// If the selection changed to nothing, empty and lock text view.
 	if ([[arrayController selectedObjects] count] == 0)
 	{
+		[[textView layoutManager] replaceTextStorage:[[[NSTextStorage alloc] init] autorelease]];
+		[textView setEditable:NO];
 		return;
 	}
 	
