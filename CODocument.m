@@ -25,7 +25,7 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
     self = [super init];
     if (self) {
     
-		[self setContents:[[NSMutableArray alloc] init]];
+		[self setContents:[NSMutableArray array]];
 		[self setSelectedNodes:[NSArray array]];
     
     }
@@ -114,51 +114,6 @@ NSString * const	CONodesPboardType = @"CONodesPboardType";
     }
     return [[contents retain] autorelease];
 }
-
-/*
-- (unsigned)countOfContents {
-    if (!contents) {
-        contents = [[NSMutableArray alloc] init];
-    }
-    return [contents count];
-}
-
-- (id)objectInContentsAtIndex:(unsigned)theIndex {
-    if (!contents) {
-        contents = [[NSMutableArray alloc] init];
-    }
-    return [contents objectAtIndex:theIndex];
-}
-
-- (void)getContents:(id *)objsPtr range:(NSRange)range {
-    if (!contents) {
-        contents = [[NSMutableArray alloc] init];
-    }
-    [contents getObjects:objsPtr range:range];
-}
-
-- (void)insertObject:(id)obj inContentsAtIndex:(unsigned)theIndex {
-    if (!contents) {
-        contents = [[NSMutableArray alloc] init];
-    }
-    [contents insertObject:obj atIndex:theIndex];
-}
-
-- (void)removeObjectFromContentsAtIndex:(unsigned)theIndex {
-    if (!contents) {
-        contents = [[NSMutableArray alloc] init];
-    }
-    [contents removeObjectAtIndex:theIndex];
-}
-
-- (void)replaceObjectInContentsAtIndex:(unsigned)theIndex withObject:(id)obj {
-    if (!contents) {
-        contents = [[NSMutableArray alloc] init];
-    }
-    [contents replaceObjectAtIndex:theIndex withObject:obj];
-}
-*/
-
 
 
 - (IBAction)addGroup:(id)sender

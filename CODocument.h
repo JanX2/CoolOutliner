@@ -34,8 +34,6 @@
 
 @property (copy) NSArray *selectedNodes;
 
-@property (copy) NSArray *tempExpandedItems;
-
 - (IBAction)addGroup:(id)sender;
 - (IBAction)addNote:(id)sender;
 
