@@ -23,14 +23,6 @@
 
 - (void)setContents:(NSArray *)newContents;
 - (NSArray *)contents;
-/*
-- (unsigned)countOfContents;
-- (id)objectInContentsAtIndex:(unsigned)theIndex;
-- (void)getContents:(id *)objsPtr range:(NSRange)range;
-- (void)insertObject:(id)obj inContentsAtIndex:(unsigned)theIndex;
-- (void)removeObjectFromContentsAtIndex:(unsigned)theIndex;
-- (void)replaceObjectInContentsAtIndex:(unsigned)theIndex withObject:(id)obj;
-*/
 
 @property (copy) NSArray *selectedNodes;
 
