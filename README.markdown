@@ -3,7 +3,7 @@ CoolOutliner – NSTreeController Sample Code
 
 This repository contains CoolOutliner, a sample application using NSTreeController. It contains the source code and an Xcode project. Most of the initial code came from [Keith Blount’s  “NSTreeControllerTutorial”][1] which is available from his [Literature and Latte - Free Stuff][2] page. I (Jan Weiß) updated it for 10.5 and rewrote parts in ObjC 2.0 where it seemed appropriate to me.  
 
-As I currently don’t have the time to do such an excellent piece of work as Keith’s tutorial, please use his tutorial as a guide to creating an app using an NSOutlineView with an NSTreeController. If you get stuck anywhere, you can compare your version with the one supplied here to help you figure out what may be going wrong. 
+I updated Keith’s tutorial and it is available from the [NSTreeControllerTutorial repository][5]. If you get stuck anywhere, you can compare your version with the one supplied here to help you figure out what may be going wrong. 
 
 You should be able to follow the tutorial up to the point where the drag’n’drop code is added towards the end of the tutorial (see below). The main change I made initially was using 10.5’s NSTreeNode public method -representedObject instead of 10.4’s _NSArrayControllerTreeNode private method -observedObject. 
 
@@ -43,3 +43,4 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” 
   [2]: http://www.literatureandlatte.com/freestuff/index.html
   [3]: http://gibbston.net/?p=4
   [4]: http://espresso-served-here.com/2008/05/13/nstreecontroller-and-core-data-sorted/
+  [5]: http://github.com/JanX2/NSTreeControllerTutorial
